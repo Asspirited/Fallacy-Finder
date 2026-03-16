@@ -46,6 +46,21 @@
 
 ---
 
+## Tone — Serious Play with a Comedy Undercurrent
+
+Decided 2026-03-16. Rod confirmed.
+
+Primarily a serious training tool. Not comedy with a serious edge — serious with a comedy undercurrent.
+
+- **ADVOCATE** has genuine comic potential: believes in people with an almost delusional generosity; humour comes from the gap between ADVOCATE's charitable interpretation and the accumulating evidence
+- **Mode E (Voigt-Kampff)** has inherent absurdist quality — administering a test you know is unreliable, to a subject who may or may not be conscious; comedy is structural, not performed
+- **Navarro debrief** can be dry and precise in a way that lands as dark comedy
+- Comedy should never undermine the user's sense that the stakes are real
+
+**Rule:** comedy emerges from situation and character, not from tone. No winking at the user. No self-aware moments. Situational, not performed.
+
+---
+
 ## Open UX Questions
 
 - What does the ScoreCard look like? How are probability distributions presented visually without overwhelming?

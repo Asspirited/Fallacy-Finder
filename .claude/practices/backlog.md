@@ -29,7 +29,7 @@ For items that represent a product hypothesis, add after the CD3 line:
 ## OPEN — Sorted by CD3
 
 ### BL-001 — Core panel architecture: NAVARRO, EKMAN, DECKARD, ADVOCATE
-- Description: Agent definitions with LieProfile, scoring logic, ConspireEngine wiring, RelationshipState. The foundation everything else sits on.
+- Description: Agent definitions with LieProfile, scoring logic, ConspireEngine wiring, RelationshipState. The foundation everything else sits on. **ACL must accept a model parameter from day one** — DECKARD will eventually use a different model (BL-013); build the seam now, swap the model later. All agents initially use the same model; DECKARD's route is just a named config pointing at the same endpoint for now.
 - CD3: UBV=9 TC=9 RR=9 → CoD=27, Dur=5, **CD3=5.4**
 - Status: OPEN
 - Epic: Foundation
