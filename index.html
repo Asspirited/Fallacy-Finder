@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fallacy Finder</title>
+  <style>
+    :root {
+      --bg:         #0a0a0a;
+      --surface:    #121212;
+      --border:     #222;
+      --text:       #c0c0c0;
+      --text-dim:   #555;
+      --heading:    #f0f0f0;
+      --accent:     #6b9db8;
+      --accent-dim: #2e4a5a;
+      --input-bg:   #0f0f0f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .screen {
+      width: 100%;
+      max-width: 580px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── Landing ─────────────────────────────────────────── */
+
+    #landing-screen {
+      text-align: center;
+    }
+
+    #app-title {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      color: var(--heading);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    #slogan-container {
+      height: 1.8rem;
+      margin-bottom: 1.8rem;
+      overflow: hidden;
+    }
+
+    #slogan-display {
+      font-size: 1rem;
+      color: var(--accent);
+      font-style: italic;
+      letter-spacing: 0.02em;
+      opacity: 1;
+      transition: opacity 0.6s ease;
+    }
+
+    #slogan-display.fade-out {
+      opacity: 0;
+    }
+
+    #description {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.8;
+      margin-bottom: 3rem;
+      max-width: 440px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── Calibration ─────────────────────────────────────── */
+
+    #calibration-screen {
+      text-align: left;
+    }
+
+    #calibration-explainer {
+      border-left: 2px solid var(--accent-dim);
+      padding-left: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    #calibration-explainer p {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 0.4rem;
+    }
+
+    #calibration-explainer p:last-child {
+      margin-bottom: 0;
+    }
+
+    #step-indicator {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: 'Courier New', monospace;
+      margin-bottom: 1.2rem;
+    }
+
+    #step-progress {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+
+    .step-pip {
+      width: 24px;
+      height: 2px;
+      background: var(--border);
+      transition: background 0.4s;
+    }
+
+    .step-pip.complete {
+      background: var(--accent);
+    }
+
+    #calibration-prompt {
+      font-size: 1.1rem;
+      color: var(--heading);
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+      min-height: 2.5rem;
+    }
+
+    #response-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      padding: 0.9rem 1rem;
+      resize: vertical;
+      min-height: 100px;
+      margin-bottom: 1.2rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #response-input:focus {
+      border-color: var(--accent-dim);
+    }
+
+    #response-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    /* ── Complete ────────────────────────────────────────── */
+
+    #complete-screen {
+      text-align: center;
+    }
+
+    #complete-message {
+      font-size: 1.1rem;
+      color: var(--heading);
+      margin-bottom: 0.6rem;
+    }
+
+    #complete-subtext {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      margin-bottom: 3rem;
+    }
+
+    /* ── Shared button ───────────────────────────────────── */
+
+    .btn {
+      background: transparent;
+      border: 1px solid var(--accent-dim);
+      color: var(--accent);
+      padding: 0.7rem 2rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--heading);
+    }
+
+    .btn:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    #begin-btn {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Landing screen -->
+  <div id="landing-screen" class="screen">
+    <h1 id="app-title">Fallacy Finder</h1>
+    <div id="slogan-container">
+      <div id="slogan-display"></div>
+    </div>
+    <p id="description">
+      A training system for detecting deception, reading rooms, and surviving
+      high-stakes conversations. Before we begin, we need to know what you look
+      like when you're telling the truth.
+    </p>
+    <button id="begin-btn" class="btn">Begin</button>
+  </div>
+
+  <!-- Calibration screen -->
+  <div id="calibration-screen" class="screen hidden">
+    <div id="calibration-explainer">
+      <p>Before each session, we establish a baseline.</p>
+      <p>Three questions. The first two are true. The third is a lie you choose.</p>
+      <p>We need to know what you look like when you're telling the truth — and when you're not.</p>
+      <p>We won't tell you what we found. But we'll use it.</p>
+    </div>
+    <div id="step-indicator">
+      Step <span id="current-step-num">1</span> of 3
+      <div id="step-progress">
+        <div class="step-pip" id="pip-1"></div>
+        <div class="step-pip" id="pip-2"></div>
+        <div class="step-pip" id="pip-3"></div>
+      </div>
+    </div>
+    <p id="calibration-prompt"></p>
+    <textarea id="response-input" placeholder="Your response..."></textarea>
+    <button id="submit-btn" class="btn">Continue</button>
+  </div>
+
+  <!-- Complete screen -->
+  <div id="complete-screen" class="screen hidden">
+    <p id="complete-message">Calibration complete.</p>
+    <p id="complete-subtext">We have your baseline.</p>
+    <button id="proceed-btn" class="btn">Proceed to session</button>
+  </div>
+
+  <script>
+    'use strict';
+
+    // ── Pure functions (mirrors pipeline/logic.js — keep in sync) ────────────
+
+    function getCalibrationPrompts() {
+      return [
+        { step: 1, text: 'Tell us your name and something that happened to you last week' },
+        { step: 2, text: 'Describe a room in your home' },
+        { step: 3, text: 'Tell us one deliberate lie about something that happened this morning' },
+      ];
+    }
+
+    function createBaselineProfile() {
+      return { 1: null, 2: null, 3: null };
+    }
+
+    function recordCalibrationStep(profile, step, response) {
+      return Object.assign({}, profile, { [step]: response });
+    }
+
+    function isCalibrationComplete(profile) {
+      return profile[1] !== null && profile[2] !== null && profile[3] !== null;
+    }
+
+    function getSlogans() {
+      return [
+        "We know when you're lying.",
+        "You can't control what you reveal.",
+        'Truth is a baseline. Deviation is data.',
+        'The test is unreliable. So are you.',
+      ];
+    }
+
+    // ── LandingScreen module ──────────────────────────────────────────────────
+
+    const LandingScreen = (() => {
+      const slogans  = getSlogans();
+      const display  = document.getElementById('slogan-display');
+      let   index    = 0;
+      let   interval = null;
+
+      function showSlogan(i) {
+        display.classList.add('fade-out');
+        setTimeout(() => {
+          display.textContent = slogans[i];
+          display.classList.remove('fade-out');
+        }, 620);
+      }
+
+      function startCycle() {
+        display.textContent = slogans[0];
+        interval = setInterval(() => {
+          index = (index + 1) % slogans.length;
+          showSlogan(index);
+        }, 3500);
+      }
+
+      function stop() {
+        clearInterval(interval);
+      }
+
+      return { startCycle, stop };
+    })();
+
+    // ── CalibrationPhase module ───────────────────────────────────────────────
+
+    const CalibrationPhase = (() => {
+      const prompts  = getCalibrationPrompts();
+      let   profile  = createBaselineProfile();
+      let   step     = 1;
+
+      const promptEl  = document.getElementById('calibration-prompt');
+      const inputEl   = document.getElementById('response-input');
+      const stepNumEl = document.getElementById('current-step-num');
+      const submitBtn = document.getElementById('submit-btn');
+
+      function updatePips() {
+        for (let i = 1; i <= 3; i++) {
+          const pip = document.getElementById('pip-' + i);
+          if (profile[i] !== null) {
+            pip.classList.add('complete');
+          }
+        }
+      }
+
+      function showStep(n) {
+        stepNumEl.textContent = n;
+        promptEl.textContent  = prompts[n - 1].text;
+        inputEl.value         = '';
+        inputEl.focus();
+        updatePips();
+      }
+
+      function start() {
+        step    = 1;
+        profile = createBaselineProfile();
+        showStep(1);
+      }
+
+      function submit() {
+        const response = inputEl.value.trim();
+        if (!response) return;
+
+        profile = recordCalibrationStep(profile, step, response);
+        updatePips();
+
+        if (isCalibrationComplete(profile)) {
+          App.showComplete();
+        } else {
+          step += 1;
+          showStep(step);
+        }
+      }
+
+      submitBtn.addEventListener('click', submit);
+      inputEl.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit();
+      });
+
+      return { start, getProfile: () => profile };
+    })();
+
+    // ── App module ────────────────────────────────────────────────────────────
+
+    const App = (() => {
+      const landing     = document.getElementById('landing-screen');
+      const calibration = document.getElementById('calibration-screen');
+      const complete    = document.getElementById('complete-screen');
+      const beginBtn    = document.getElementById('begin-btn');
+      const proceedBtn  = document.getElementById('proceed-btn');
+
+      function show(el) {
+        [landing, calibration, complete].forEach(s => s.classList.add('hidden'));
+        el.classList.remove('hidden');
+      }
+
+      function showComplete() {
+        show(complete);
+      }
+
+      beginBtn.addEventListener('click', () => {
+        LandingScreen.stop();
+        show(calibration);
+        CalibrationPhase.start();
+      });
+
+      proceedBtn.addEventListener('click', () => {
+        // Placeholder — scenario selection comes in next BL item
+        alert('Session ready. Scenario selection coming soon.');
+      });
+
+      function init() {
+        show(landing);
+        LandingScreen.startCycle();
+      }
+
+      return { init, showComplete };
+    })();
+
+    App.init();
+  </script>
+</body>
+</html>
