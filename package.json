@@ -1,0 +1,8 @@
+{
+  "name": "fallacy-finder",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node pipeline/unit-runner.js && node pipeline/gherkin-runner.js",
+    "pipeline": "node pipeline/run-all.js"
+  }
+}

@@ -118,6 +118,12 @@ For items that represent a product hypothesis, add after the CD3 line:
 - Status: OPEN
 - Epic: Architecture
 
+### BL-016 — Expert debrief extension: Voss and domain expert voices
+- Description: Debrief augmented by named expert voices (e.g. Chris Voss for negotiation modes, Navarro for non-verbal, Ekman for micro-facial). Experts comment on what the user missed and why in their specific domain. Currently debrief is panel-only (NAVARRO, EKMAN etc.). This extends it with real-world practitioner voice. Three Amigos needed on scope: which experts, which modes, how differentiated from panel agents.
+- CD3: UBV=7 TC=2 RR=2 → CoD=11, Dur=5, **CD3=2.2**
+- Status: OPEN
+- Epic: Debrief
+
 ---
 
 ## CLOSED

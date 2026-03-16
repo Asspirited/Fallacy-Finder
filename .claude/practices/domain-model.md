@@ -15,6 +15,7 @@ These terms have precise meanings within this domain. Use them consistently.
 | **ScoringPanel** | The four internal agents (NAVARRO, EKMAN, DECKARD, ADVOCATE) that assess the subject. Users never directly address the panel. |
 | **ScoringChannel** | One dimension of assessment: verbal, micro-facial, postural, acoustic, typological |
 | **Baseline** | The subject's behaviour pattern during low-stakes, truthful responses. Deviation from baseline is the signal, not absolute state. |
+| **BaselineProfile** | The structured output of the CalibrationPhase. Contains the three calibration responses (truthful step 1, truthful step 2, controlled lie step 3) keyed by step. Session-scoped — never persists between sessions. Used by scoring agents as the reference point for deviation detection. |
 | **BaselineDeviation** | A change from the established baseline on a specific channel |
 | **Cluster** | Multiple behavioural signals occurring together or in rapid succession — more diagnostic than any single signal |
 | **ConspireEngine** | Mechanism that fires when two panel agents build consensus independently. In Veritas: NAVARRO + EKMAN agreeing triggers DECKARD verdict |
