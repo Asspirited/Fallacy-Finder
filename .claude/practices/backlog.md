@@ -31,13 +31,13 @@ For items that represent a product hypothesis, add after the CD3 line:
 ### BL-001 — Core panel architecture: NAVARRO, EKMAN, DECKARD, ADVOCATE
 - Description: Agent definitions with LieProfile, scoring logic, ConspireEngine wiring, RelationshipState. The foundation everything else sits on. **ACL must accept a model parameter from day one** — DECKARD will eventually use a different model (BL-013); build the seam now, swap the model later. All agents initially use the same model; DECKARD's route is just a named config pointing at the same endpoint for now.
 - CD3: UBV=9 TC=9 RR=9 → CoD=27, Dur=5, **CD3=5.4**
-- Status: OPEN
+- Status: CLOSED — 2026-03-16, commit cb51356
 - Epic: Foundation
 
 ### BL-002 — Mode C: Car Purchase scenario
 - Description: Single seller agent with `legalistic` LieProfile, full verbal scoring pipeline, calibration phase, ScoreCard output. Simplest mode — proves full stack.
 - CD3: UBV=8 TC=8 RR=8 → CoD=24, Dur=5, **CD3=4.8**
-- Status: OPEN
+- Status: CLOSED — 2026-03-16, commit cb51356
 - Epic: Foundation
 
 ### BL-003 — Verbal analysis engine
@@ -134,4 +134,6 @@ For items that represent a product hypothesis, add after the CD3 line:
 
 ## CLOSED
 
-*(None yet — project start 2026-03-15)*
+- **BL-004** — Calibration phase — 2026-03-16, commit 7e42f80
+- **BL-001** — Core panel architecture (walking skeleton: NAVARRO stub) — 2026-03-16, commit cb51356
+- **BL-002** — Mode C: Car Purchase scenario (walking skeleton: Ray stub, ScoreCard UI) — 2026-03-16, commit cb51356

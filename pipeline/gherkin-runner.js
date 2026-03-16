@@ -16,6 +16,8 @@ const {
   createTranscript,
   addToTranscript,
   assessTranscript,
+  buildRayRequest,
+  RAY_SYSTEM_PROMPT,
 } = require('./logic.js');
 
 let passed = 0;
@@ -216,6 +218,45 @@ scenario('ScoringPanel: returns empty comfortMap for neutral topics', () => {
   })();
   const card = assessTranscript(t, profile);
   expect(card.comfortMap.length).toBe(0);
+});
+
+// ── worker.feature (request builder) ─────────────────────────────────────────
+
+scenario('Worker: buildRayRequest returns correct shape from transcript', () => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'user',   'What about the brakes?');
+  t = addToTranscript(t, 'seller', 'Absolutely fine.');
+  const req = buildRayRequest(t);
+  expect(Array.isArray(req.messages)).toBe(true);
+  expect(req.messages.length).toBe(2);
+});
+
+scenario('Worker: user transcript entries map to role "user"', () => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'user', 'What colour is it?');
+  const req = buildRayRequest(t);
+  expect(req.messages[0].role).toBe('user');
+  expect(req.messages[0].content).toBe('What colour is it?');
+});
+
+scenario('Worker: seller transcript entries map to role "assistant"', () => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'seller', 'She\'s silver.');
+  const req = buildRayRequest(t);
+  expect(req.messages[0].role).toBe('assistant');
+});
+
+scenario('Worker: empty transcript produces empty messages array', () => {
+  const req = buildRayRequest(createTranscript());
+  expect(req.messages.length).toBe(0);
+});
+
+scenario('Worker: RAY_SYSTEM_PROMPT is a non-empty string', () => {
+  expect(typeof RAY_SYSTEM_PROMPT === 'string' && RAY_SYSTEM_PROMPT.length > 0).toBe(true);
+});
+
+scenario('Worker: RAY_SYSTEM_PROMPT contains legalistic constraint', () => {
+  expect(/legalistic/i.test(RAY_SYSTEM_PROMPT)).toBe(true);
 });
 
 // ── Summary ──────────────────────────────────────────────────────────────────

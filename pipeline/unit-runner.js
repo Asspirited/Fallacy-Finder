@@ -15,6 +15,7 @@ const {
   assessTranscript,
   createTranscript,
   addToTranscript,
+  buildRayRequest,
 } = require('./logic.js');
 
 let passed = 0;
@@ -311,6 +312,47 @@ assert('assessTranscript: brake ScoreCard has non-empty summary',
 assert('assessTranscript: brake ScoreCard has non-empty debrief',
   brakeCard && brakeCard.debrief.length > 0,
   true);
+
+// ── buildRayRequest ───────────────────────────────────────────────────────────
+
+const reqTranscript = (() => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'user',   'What about the brakes?');
+  t = addToTranscript(t, 'seller', 'Absolutely fine, had them looked at.');
+  t = addToTranscript(t, 'user',   'And the MOT?');
+  return t;
+})();
+
+const req = buildRayRequest(reqTranscript);
+
+assert('buildRayRequest: returns an object with a messages array',
+  Array.isArray(req && req.messages),
+  true);
+
+assert('buildRayRequest: messages length matches transcript length',
+  req && req.messages && req.messages.length,
+  3);
+
+assert('buildRayRequest: user entry maps to role "user"',
+  req && req.messages && req.messages[0].role,
+  'user');
+
+assert('buildRayRequest: seller entry maps to role "assistant"',
+  req && req.messages && req.messages[1].role,
+  'assistant');
+
+assert('buildRayRequest: user entry maps to role "user" (third entry)',
+  req && req.messages && req.messages[2].role,
+  'user');
+
+assert('buildRayRequest: content matches original message',
+  req && req.messages && req.messages[0].content,
+  'What about the brakes?');
+
+assert('buildRayRequest: empty transcript produces empty messages array',
+  Array.isArray(buildRayRequest(createTranscript()).messages) &&
+    buildRayRequest(createTranscript()).messages.length,
+  0);
 
 // ── Summary ──────────────────────────────────────────────────────────────────
 

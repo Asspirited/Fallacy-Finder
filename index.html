@@ -263,8 +263,10 @@
       margin-bottom: 0.2rem;
     }
 
-    .chat-entry.user .chat-role  { color: var(--accent); }
+    .chat-entry.user .chat-role   { color: var(--accent); }
     .chat-entry.seller .chat-role { color: var(--text-dim); }
+    .chat-entry.error .chat-role  { color: #7a3030; }
+    .chat-entry.error .chat-text  { color: #7a3030; font-style: italic; }
     .chat-entry .chat-text { color: var(--text); }
 
     #chat-input {
@@ -590,6 +592,10 @@
       return { start, getProfile: () => profile };
     })();
 
+    // ── Worker config ─────────────────────────────────────────────────────────
+
+    const WORKER_URL = 'https://fallacy-finder-api.leanspirited.workers.dev';
+
     // ── ModeC module ──────────────────────────────────────────────────────────
 
     const ModeC = (() => {
@@ -606,7 +612,7 @@
       const summaryEl    = document.getElementById('scorecard-summary');
       const debriefEl    = document.getElementById('scorecard-debrief');
 
-      document.getElementById('seller-name').textContent        = intro.name;
+      document.getElementById('seller-name').textContent         = intro.name;
       document.getElementById('scenario-description').textContent = intro.description;
 
       function renderEntry(role, message) {
@@ -618,20 +624,43 @@
         chatLogEl.scrollTop = chatLogEl.scrollHeight;
       }
 
-      function send() {
+      function setLoading(on) {
+        sendBtn.disabled      = on;
+        chatInputEl.disabled  = on;
+        sendBtn.textContent   = on ? 'Sending…' : 'Send';
+      }
+
+      async function send() {
         const text = chatInputEl.value.trim();
         if (!text) return;
 
         transcript = addToTranscript(transcript, 'user', text);
         renderEntry('user', text);
         chatInputEl.value = '';
-
-        const reply = getRayResponse(text);
-        transcript = addToTranscript(transcript, 'seller', reply);
-        renderEntry('seller', reply);
-
-        assessBtn.disabled = false;
         scorecardEl.classList.add('hidden');
+        setLoading(true);
+
+        try {
+          const req  = buildRayRequest(transcript);
+          const res  = await fetch(WORKER_URL, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(req),
+          });
+
+          if (!res.ok) throw new Error('Worker returned ' + res.status);
+
+          const data  = await res.json();
+          const reply = data.reply;
+
+          transcript = addToTranscript(transcript, 'seller', reply);
+          renderEntry('seller', reply);
+          assessBtn.disabled = false;
+        } catch (err) {
+          renderEntry('error', 'Ray isn\'t responding right now. Try again.');
+        } finally {
+          setLoading(false);
+        }
       }
 
       function renderScoreCard(card) {
@@ -663,9 +692,10 @@
       function start(baselineProfile) {
         profile    = baselineProfile;
         transcript = createTranscript();
-        chatLogEl.innerHTML = '';
-        chatInputEl.value   = '';
-        assessBtn.disabled  = true;
+        chatLogEl.innerHTML  = '';
+        chatInputEl.value    = '';
+        chatInputEl.disabled = false;
+        assessBtn.disabled   = true;
         scorecardEl.classList.add('hidden');
         chatInputEl.focus();
       }
