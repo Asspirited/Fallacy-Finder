@@ -49,7 +49,7 @@ For items that represent a product hypothesis, add after the CD3 line:
 ### BL-004 — Calibration phase
 - Description: 90-second baseline establishment. Three steps: neutral truthful, visual neutral, controlled lie. Teaches the user what baseline is.
 - CD3: UBV=7 TC=7 RR=7 → CoD=21, Dur=3, **CD3=7.0**
-- Status: OPEN
+- Status: CLOSED — 2026-03-16, commit 7e42f80
 - Epic: Foundation
 
 ### BL-005 — Mode A: Job Interview
@@ -123,6 +123,12 @@ For items that represent a product hypothesis, add after the CD3 line:
 - CD3: UBV=7 TC=2 RR=2 → CoD=11, Dur=5, **CD3=2.2**
 - Status: OPEN
 - Epic: Debrief
+
+### BL-017 — Wire real Cloudflare Worker: swap stub ACL for live API calls
+- Description: Replace stub ACL with real Cloudflare Worker (same pattern as cusslab). Create worker.js, deploy to Cloudflare, set ANTHROPIC_API_KEY secret. Depends on BL-001 + BL-002 being proven with stub first.
+- CD3: UBV=8 TC=8 RR=7 → CoD=23, Dur=2, **CD3=11.5**
+- Status: OPEN
+- Epic: Foundation
 
 ---
 

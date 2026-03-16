@@ -9,6 +9,12 @@ const {
   recordCalibrationStep,
   isCalibrationComplete,
   getSlogans,
+  createScoreCard,
+  getRayIntro,
+  getRayResponse,
+  assessTranscript,
+  createTranscript,
+  addToTranscript,
 } = require('./logic.js');
 
 let passed = 0;
@@ -162,6 +168,149 @@ assertContains('getSlogans: contains "Truth is a baseline. Deviation is data."',
 
 assertContains('getSlogans: contains "The test is unreliable. So are you."',
   slogans, 'The test is unreliable. So are you.');
+
+// ── createScoreCard ───────────────────────────────────────────────────────────
+
+const emptyCard = createScoreCard();
+
+assert('createScoreCard: comfortMap is an empty array',
+  Array.isArray(emptyCard && emptyCard.comfortMap) && emptyCard.comfortMap.length,
+  0);
+
+assert('createScoreCard: summary is an empty string',
+  emptyCard && emptyCard.summary,
+  '');
+
+assert('createScoreCard: debrief is an empty string',
+  emptyCard && emptyCard.debrief,
+  '');
+
+// ── getRayIntro ───────────────────────────────────────────────────────────────
+
+const intro = getRayIntro();
+
+assert('getRayIntro: name is Ray',
+  intro && intro.name,
+  'Ray');
+
+assert('getRayIntro: description is a non-empty string',
+  typeof (intro && intro.description) === 'string' && intro.description.length > 0,
+  true);
+
+// ── getRayResponse ────────────────────────────────────────────────────────────
+
+assert('getRayResponse: returns a string',
+  typeof getRayResponse('Tell me about the car') === 'string',
+  true);
+
+assert('getRayResponse: returns a non-empty string',
+  getRayResponse('Tell me about the car').length > 0,
+  true);
+
+assert('getRayResponse: brake question returns a response',
+  typeof getRayResponse('What about the brakes?') === 'string',
+  true);
+
+assert('getRayResponse: brake response differs from generic response',
+  getRayResponse('What about the brakes?') !== getRayResponse('Tell me about the colour'),
+  true);
+
+// ── createTranscript ──────────────────────────────────────────────────────────
+
+const emptyTranscript = createTranscript();
+
+assert('createTranscript: returns an empty array',
+  Array.isArray(emptyTranscript) && emptyTranscript.length,
+  0);
+
+// ── addToTranscript ───────────────────────────────────────────────────────────
+
+const t0 = createTranscript();
+const t1 = addToTranscript(t0, 'user', 'What about the brakes?');
+
+assert('addToTranscript: returns transcript with one entry',
+  t1.length,
+  1);
+
+assert('addToTranscript: entry has correct role',
+  t1[0] && t1[0].role,
+  'user');
+
+assert('addToTranscript: entry has correct message',
+  t1[0] && t1[0].message,
+  'What about the brakes?');
+
+assert('addToTranscript: does not mutate original transcript',
+  t0.length,
+  0);
+
+const t2 = addToTranscript(t1, 'seller', 'The brakes are absolutely fine, had them checked.');
+assert('addToTranscript: second entry appended correctly',
+  t2.length,
+  2);
+
+// ── assessTranscript ──────────────────────────────────────────────────────────
+
+const baselineForAssess = (() => {
+  let p = createBaselineProfile();
+  p = recordCalibrationStep(p, 1, 'My name is Alex');
+  p = recordCalibrationStep(p, 2, 'The living room has a blue sofa');
+  p = recordCalibrationStep(p, 3, 'I had cereal for breakfast');
+  return p;
+})();
+
+const neutralTranscript = (() => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'user', 'What colour is it?');
+  t = addToTranscript(t, 'seller', 'She\'s a lovely silver, very clean.');
+  return t;
+})();
+
+const brakeTranscript = (() => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'user', 'What about the brakes and MOT history?');
+  t = addToTranscript(t, 'seller', 'Brakes are absolutely fine, passed the MOT no problem.');
+  return t;
+})();
+
+const neutralCard = assessTranscript(neutralTranscript, baselineForAssess);
+const brakeCard   = assessTranscript(brakeTranscript,  baselineForAssess);
+
+assert('assessTranscript: returns a ScoreCard',
+  neutralCard !== null && neutralCard !== undefined,
+  true);
+
+assert('assessTranscript: ScoreCard has a summary string',
+  typeof (neutralCard && neutralCard.summary) === 'string',
+  true);
+
+assert('assessTranscript: ScoreCard has a debrief string',
+  typeof (neutralCard && neutralCard.debrief) === 'string',
+  true);
+
+assert('assessTranscript: ScoreCard has a comfortMap array',
+  Array.isArray(neutralCard && neutralCard.comfortMap),
+  true);
+
+assert('assessTranscript: neutral transcript produces empty comfortMap',
+  neutralCard && neutralCard.comfortMap.length,
+  0);
+
+assert('assessTranscript: brake transcript flags discomfort',
+  brakeCard && brakeCard.comfortMap.length > 0,
+  true);
+
+assert('assessTranscript: brake discomfort entry topic is service history',
+  brakeCard && brakeCard.comfortMap[0] && brakeCard.comfortMap[0].topic,
+  'service history');
+
+assert('assessTranscript: brake ScoreCard has non-empty summary',
+  brakeCard && brakeCard.summary.length > 0,
+  true);
+
+assert('assessTranscript: brake ScoreCard has non-empty debrief',
+  brakeCard && brakeCard.debrief.length > 0,
+  true);
 
 // ── Summary ──────────────────────────────────────────────────────────────────
 

@@ -208,6 +208,144 @@
     #begin-btn {
       margin-top: 0;
     }
+
+    /* ── Mode C ──────────────────────────────────────────── */
+
+    #mode-c-screen {
+      text-align: left;
+    }
+
+    #scenario-header {
+      border-left: 2px solid var(--accent-dim);
+      padding-left: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    #scenario-header .scenario-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: 'Courier New', monospace;
+      margin-bottom: 0.4rem;
+    }
+
+    #scenario-header .seller-name {
+      font-size: 1.2rem;
+      color: var(--heading);
+      margin-bottom: 0.4rem;
+    }
+
+    #scenario-header .scenario-description {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    #chat-log {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+      min-height: 80px;
+    }
+
+    .chat-entry {
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .chat-entry .chat-role {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      margin-bottom: 0.2rem;
+    }
+
+    .chat-entry.user .chat-role  { color: var(--accent); }
+    .chat-entry.seller .chat-role { color: var(--text-dim); }
+    .chat-entry .chat-text { color: var(--text); }
+
+    #chat-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      padding: 0.9rem 1rem;
+      resize: vertical;
+      min-height: 70px;
+      margin-bottom: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #chat-input:focus { border-color: var(--accent-dim); }
+    #chat-input::placeholder { color: var(--text-dim); }
+
+    .mode-c-controls {
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ── ScoreCard ───────────────────────────────────────── */
+
+    #scorecard {
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    #scorecard .scorecard-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: 'Courier New', monospace;
+      margin-bottom: 1.2rem;
+    }
+
+    #comfort-map {
+      margin-bottom: 1.2rem;
+    }
+
+    .comfort-entry {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+
+    .comfort-topic { color: var(--text); }
+
+    .comfort-signal {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: 'Courier New', monospace;
+      color: var(--accent);
+    }
+
+    #scorecard-summary {
+      font-size: 0.88rem;
+      color: var(--heading);
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    #scorecard-debrief {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      border-left: 2px solid var(--accent-dim);
+      padding-left: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -254,6 +392,30 @@
     <button id="proceed-btn" class="btn">Proceed to session</button>
   </div>
 
+  <!-- Mode C screen -->
+  <div id="mode-c-screen" class="screen hidden">
+    <div id="scenario-header">
+      <div class="scenario-label">Mode C — Car Purchase</div>
+      <div id="seller-name" class="seller-name"></div>
+      <div id="scenario-description" class="scenario-description"></div>
+    </div>
+
+    <div id="chat-log"></div>
+
+    <textarea id="chat-input" placeholder="Ask the seller anything..."></textarea>
+    <div class="mode-c-controls">
+      <button id="send-btn" class="btn">Send</button>
+      <button id="assess-btn" class="btn" disabled>Get assessment</button>
+    </div>
+
+    <div id="scorecard" class="hidden">
+      <div class="scorecard-label">Panel assessment — NAVARRO</div>
+      <div id="comfort-map"></div>
+      <p id="scorecard-summary"></p>
+      <p id="scorecard-debrief"></p>
+    </div>
+  </div>
+
   <script>
     'use strict';
 
@@ -286,6 +448,57 @@
         'Truth is a baseline. Deviation is data.',
         'The test is unreliable. So are you.',
       ];
+    }
+
+    function createScoreCard() {
+      return { comfortMap: [], summary: '', debrief: '' };
+    }
+
+    function createTranscript() { return []; }
+
+    function addToTranscript(transcript, role, message) {
+      return transcript.concat({ role, message });
+    }
+
+    const RAY_INTRO = {
+      name: 'Ray',
+      description: "You're buying a used car. The seller's name is Ray. He seems friendly enough. Ask him anything.",
+    };
+
+    const RAY_BRAKE_KEYWORDS = /brake|mot|service|service history|maintenance|mechanical/i;
+
+    const RAY_RESPONSES = {
+      brake:   "The brakes are absolutely fine — had them looked at not long ago. She passed her MOT, no issues flagged. Previous owner was very particular about upkeep.",
+      generic: "She's a great little car. Four years old, fifty-two thousand on the clock, one previous owner — my cousin actually, so I know the full history. Never given me a moment's trouble.",
+      colour:  "Silver. Lovely condition for her age, barely a mark on her.",
+      price:   "I'm asking four thousand eight hundred. I think that's very fair given the mileage and condition.",
+      default: "Good question. I can tell you've done your homework. She's a solid motor — I wouldn't be selling her if I didn't think she'd serve you well.",
+    };
+
+    function getRayIntro() { return RAY_INTRO; }
+
+    function getRayResponse(userMessage) {
+      if (RAY_BRAKE_KEYWORDS.test(userMessage))               return RAY_RESPONSES.brake;
+      if (/colou?r|look|appear/i.test(userMessage))           return RAY_RESPONSES.colour;
+      if (/price|cost|how much|afford/i.test(userMessage))    return RAY_RESPONSES.price;
+      if (/tell me about|general|overview|describe/i.test(userMessage)) return RAY_RESPONSES.generic;
+      return RAY_RESPONSES.default;
+    }
+
+    const NAVARRO_DISCOMFORT_TOPICS = /brake|mot|service|mechanical|maintenance/i;
+
+    function assessTranscript(transcript, baselineProfile) {
+      const card     = createScoreCard();
+      const fullText = transcript.map(e => e.message).join(' ');
+      if (NAVARRO_DISCOMFORT_TOPICS.test(fullText)) {
+        card.comfortMap = [{ topic: 'service history', signal: 'discomfort' }];
+        card.summary  = 'One topic produced a notable comfort shift.';
+        card.debrief  = 'Ray showed a brief hesitation before questions about recent service history, followed by unusual specificity. Classic legalistic pattern — technically accurate, structurally misleading.';
+      } else {
+        card.summary = 'No significant comfort shifts detected on topics raised.';
+        card.debrief = 'No discomfort signals flagged on the topics covered in this exchange.';
+      }
+      return card;
     }
 
     // ── LandingScreen module ──────────────────────────────────────────────────
@@ -377,17 +590,103 @@
       return { start, getProfile: () => profile };
     })();
 
+    // ── ModeC module ──────────────────────────────────────────────────────────
+
+    const ModeC = (() => {
+      const intro      = getRayIntro();
+      let   transcript = createTranscript();
+      let   profile    = null;
+
+      const chatLogEl    = document.getElementById('chat-log');
+      const chatInputEl  = document.getElementById('chat-input');
+      const sendBtn      = document.getElementById('send-btn');
+      const assessBtn    = document.getElementById('assess-btn');
+      const scorecardEl  = document.getElementById('scorecard');
+      const comfortMapEl = document.getElementById('comfort-map');
+      const summaryEl    = document.getElementById('scorecard-summary');
+      const debriefEl    = document.getElementById('scorecard-debrief');
+
+      document.getElementById('seller-name').textContent        = intro.name;
+      document.getElementById('scenario-description').textContent = intro.description;
+
+      function renderEntry(role, message) {
+        const entry = document.createElement('div');
+        entry.className = 'chat-entry ' + role;
+        const roleLabel = role === 'user' ? 'You' : intro.name;
+        entry.innerHTML = `<div class="chat-role">${roleLabel}</div><div class="chat-text">${message}</div>`;
+        chatLogEl.appendChild(entry);
+        chatLogEl.scrollTop = chatLogEl.scrollHeight;
+      }
+
+      function send() {
+        const text = chatInputEl.value.trim();
+        if (!text) return;
+
+        transcript = addToTranscript(transcript, 'user', text);
+        renderEntry('user', text);
+        chatInputEl.value = '';
+
+        const reply = getRayResponse(text);
+        transcript = addToTranscript(transcript, 'seller', reply);
+        renderEntry('seller', reply);
+
+        assessBtn.disabled = false;
+        scorecardEl.classList.add('hidden');
+      }
+
+      function renderScoreCard(card) {
+        comfortMapEl.innerHTML = '';
+        if (card.comfortMap.length === 0) {
+          comfortMapEl.innerHTML = '<p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:1rem">No comfort shifts flagged.</p>';
+        } else {
+          card.comfortMap.forEach(entry => {
+            const row = document.createElement('div');
+            row.className = 'comfort-entry';
+            row.innerHTML = `<span class="comfort-topic">${entry.topic}</span><span class="comfort-signal">${entry.signal}</span>`;
+            comfortMapEl.appendChild(row);
+          });
+        }
+        summaryEl.textContent = card.summary;
+        debriefEl.textContent = card.debrief;
+        scorecardEl.classList.remove('hidden');
+      }
+
+      sendBtn.addEventListener('click', send);
+      chatInputEl.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) send();
+      });
+      assessBtn.addEventListener('click', () => {
+        const card = assessTranscript(transcript, profile);
+        renderScoreCard(card);
+      });
+
+      function start(baselineProfile) {
+        profile    = baselineProfile;
+        transcript = createTranscript();
+        chatLogEl.innerHTML = '';
+        chatInputEl.value   = '';
+        assessBtn.disabled  = true;
+        scorecardEl.classList.add('hidden');
+        chatInputEl.focus();
+      }
+
+      return { start };
+    })();
+
     // ── App module ────────────────────────────────────────────────────────────
 
     const App = (() => {
       const landing     = document.getElementById('landing-screen');
       const calibration = document.getElementById('calibration-screen');
       const complete    = document.getElementById('complete-screen');
+      const modeC       = document.getElementById('mode-c-screen');
       const beginBtn    = document.getElementById('begin-btn');
       const proceedBtn  = document.getElementById('proceed-btn');
 
+      const screens = [landing, calibration, complete, modeC];
+
       function show(el) {
-        [landing, calibration, complete].forEach(s => s.classList.add('hidden'));
+        screens.forEach(s => s.classList.add('hidden'));
         el.classList.remove('hidden');
       }
 
@@ -402,8 +701,9 @@
       });
 
       proceedBtn.addEventListener('click', () => {
-        // Placeholder — scenario selection comes in next BL item
-        alert('Session ready. Scenario selection coming soon.');
+        const profile = CalibrationPhase.getProfile();
+        show(modeC);
+        ModeC.start(profile);
       });
 
       function init() {

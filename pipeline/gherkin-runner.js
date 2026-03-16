@@ -11,6 +11,11 @@ const {
   recordCalibrationStep,
   isCalibrationComplete,
   getSlogans,
+  getRayIntro,
+  getRayResponse,
+  createTranscript,
+  addToTranscript,
+  assessTranscript,
 } = require('./logic.js');
 
 let passed = 0;
@@ -109,6 +114,108 @@ scenario('Calibration: BaselineProfile holds all three responses after completio
   expect(profile[1]).toBe('step one response');
   expect(profile[2]).toBe('step two response');
   expect(profile[3]).toBe('step three response');
+});
+
+// ── mode-c.feature ───────────────────────────────────────────────────────────
+
+scenario('Mode C: user sees the seller name and scenario description', () => {
+  const intro = getRayIntro();
+  expect(typeof intro.name).toBe('string');
+  expect(intro.name.length > 0).toBe(true);
+  expect(typeof intro.description).toBe('string');
+  expect(intro.description.length > 0).toBe(true);
+});
+
+scenario('Mode C: user sends a message and receives a response', () => {
+  const response = getRayResponse('Tell me about the car');
+  expect(typeof response).toBe('string');
+  expect(response.length > 0).toBe(true);
+});
+
+scenario('Mode C: user can request an assessment after sending a message', () => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'user', 'What about the brakes?');
+  t = addToTranscript(t, 'seller', getRayResponse('What about the brakes?'));
+  const profile = (() => {
+    let p = createBaselineProfile();
+    p = recordCalibrationStep(p, 1, 'r1');
+    p = recordCalibrationStep(p, 2, 'r2');
+    p = recordCalibrationStep(p, 3, 'r3');
+    return p;
+  })();
+  const card = assessTranscript(t, profile);
+  expect(card !== null && card !== undefined).toBe(true);
+  expect(typeof card.summary).toBe('string');
+  expect(typeof card.debrief).toBe('string');
+  expect(Array.isArray(card.comfortMap)).toBe(true);
+});
+
+scenario('Mode C: ScoreCard contains required elements when service history asked', () => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'user', 'What is the service history like?');
+  t = addToTranscript(t, 'seller', getRayResponse('What is the service history like?'));
+  const profile = (() => {
+    let p = createBaselineProfile();
+    p = recordCalibrationStep(p, 1, 'r1');
+    p = recordCalibrationStep(p, 2, 'r2');
+    p = recordCalibrationStep(p, 3, 'r3');
+    return p;
+  })();
+  const card = assessTranscript(t, profile);
+  expect(card.comfortMap.length > 0).toBe(true);
+  expect(card.summary.length > 0).toBe(true);
+  expect(card.debrief.length > 0).toBe(true);
+});
+
+// ── scoring-panel.feature ─────────────────────────────────────────────────────
+
+scenario('ScoringPanel: returns a ScoreCard from any transcript', () => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'user', 'What colour is it?');
+  t = addToTranscript(t, 'seller', 'Silver.');
+  const profile = (() => {
+    let p = createBaselineProfile();
+    p = recordCalibrationStep(p, 1, 'r1');
+    p = recordCalibrationStep(p, 2, 'r2');
+    p = recordCalibrationStep(p, 3, 'r3');
+    return p;
+  })();
+  const card = assessTranscript(t, profile);
+  expect(card !== null && card !== undefined).toBe(true);
+  expect(typeof card.summary).toBe('string');
+  expect(typeof card.debrief).toBe('string');
+});
+
+scenario('ScoringPanel: flags discomfort when service history topics appear', () => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'user', 'What about the brakes and MOT history?');
+  t = addToTranscript(t, 'seller', getRayResponse('What about the brakes and MOT history?'));
+  const profile = (() => {
+    let p = createBaselineProfile();
+    p = recordCalibrationStep(p, 1, 'r1');
+    p = recordCalibrationStep(p, 2, 'r2');
+    p = recordCalibrationStep(p, 3, 'r3');
+    return p;
+  })();
+  const card = assessTranscript(t, profile);
+  expect(card.comfortMap.length > 0).toBe(true);
+  expect(card.comfortMap[0].topic).toBe('service history');
+  expect(card.comfortMap[0].signal).toBe('discomfort');
+});
+
+scenario('ScoringPanel: returns empty comfortMap for neutral topics', () => {
+  let t = createTranscript();
+  t = addToTranscript(t, 'user', 'What colour is it?');
+  t = addToTranscript(t, 'seller', "She's a lovely silver.");
+  const profile = (() => {
+    let p = createBaselineProfile();
+    p = recordCalibrationStep(p, 1, 'r1');
+    p = recordCalibrationStep(p, 2, 'r2');
+    p = recordCalibrationStep(p, 3, 'r3');
+    return p;
+  })();
+  const card = assessTranscript(t, profile);
+  expect(card.comfortMap.length).toBe(0);
 });
 
 // ── Summary ──────────────────────────────────────────────────────────────────

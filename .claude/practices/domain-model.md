@@ -27,7 +27,10 @@ These terms have precise meanings within this domain. Use them consistently.
 | **CalibrationPhase** | 90-second baseline establishment before each session |
 | **VerdictConfidence** | DECKARD's probability distribution: truthful / elaborating / deceiving / confabulating / AI-generated |
 | **Tell** | A reliably observable behaviour shift — but the Tell fires before BOTH true and false statements in Mode C; the user must learn to read content not signal |
-| **ScoreCard** | Session output: per-channel assessments, weighted probability distribution, debrief notes |
+| **ScoreCard** | The output of a panel assessment. Structure: `{ comfortMap: [{ topic, signal }], summary, debrief }`. Walking skeleton uses one topic, one summary, one debrief note. Full probability distributions added later. |
+| **Transcript** | The ordered record of user messages and subject responses during a scenario. Passed to the ScoringPanel to produce a ScoreCard. |
+| **SellerAgent** | A Mode C subject agent. Hidden state (what is actually true), stated position (what they present), LieProfile, and Tell. Ray is the walking skeleton SellerAgent: `legalistic` LieProfile, hidden brake fault, over-specific when queried on service history. |
+| **StubACL** | A test-double for the Anti-Corruption Layer. Returns pre-written responses. Replaced by a real Cloudflare Worker call in BL-017. The interface is identical — the swap is a config change, not a structural one. |
 
 ---
 
