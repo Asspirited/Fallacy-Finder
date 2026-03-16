@@ -3,21 +3,14 @@
 
 ---
 
-## Status: NEW PROJECT — Worker Not Yet Created
-
-This project is in setup phase. The Cloudflare Worker does not yet exist.
-When created, update this file with canonical URLs and IDs.
-
----
-
-## Cloudflare Account (same as cusslab)
+## Cloudflare Account
 
 | Thing | Value |
 |---|---|
 | Cloudflare account | leanspirited@gmail.com |
 | Cloudflare account ID | `ce5ebfc99d1b37a7537a039d0b09d0b6` |
-| Worker URL | TBD — to be created |
-| Worker name | TBD — e.g. `veritas-api` |
+| Worker URL | `https://fallacy-finder-api.leanspirited.workers.dev` |
+| Worker name (wrangler.toml) | `fallacy-finder-api` |
 
 ---
 
@@ -29,36 +22,34 @@ Reason: wrangler has a stale cached account ID (`7721964c...`) that differs from
 
 ---
 
-## Creating the Worker (when ready)
+## Deploying / Redeploying the Worker
 
-### Step 1 — Get a Cloudflare API token
-dash.cloudflare.com → leanspirited@gmail.com → My Profile → API Tokens → Create Token
-Use the **"Edit Cloudflare Workers" template**.
-Copy the token.
-
-### Step 2 — Create the Worker
 ```bash
 export NVM_DIR="/home/rodent/.nvm" && \. "/home/rodent/.nvm/nvm.sh" && cd /home/rodent/fallacy-finder
 CLOUDFLARE_API_TOKEN=<token> CLOUDFLARE_ACCOUNT_ID=ce5ebfc99d1b37a7537a039d0b09d0b6 npx wrangler deploy
 ```
 
-### Step 3 — Set the ANTHROPIC_API_KEY secret
+Token: dash.cloudflare.com → My Profile → API Tokens → Create Token → **"Edit Cloudflare Workers" template**.
+
+## Setting the ANTHROPIC_API_KEY secret
+
 ```bash
-echo "sk-ant-..." | CLOUDFLARE_API_TOKEN=<token> CLOUDFLARE_ACCOUNT_ID=ce5ebfc99d1b37a7537a039d0b09d0b6 npx wrangler secret put ANTHROPIC_API_KEY --name veritas-api
+echo "sk-ant-..." | CLOUDFLARE_API_TOKEN=<token> CLOUDFLARE_ACCOUNT_ID=ce5ebfc99d1b37a7537a039d0b09d0b6 npx wrangler secret put ANTHROPIC_API_KEY
 ```
 
-### Step 4 — Update this file
-Add the Worker URL above. Update session-startup.md with the canary URL.
+Ask: "Is this a key you just generated right now?" before pushing.
 
 ---
 
-## Canary Check (once Worker exists)
+## Canary Check
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}" https://[worker-url]/canary
+curl -s -w "\n%{http_code}" -X POST https://fallacy-finder-api.leanspirited.workers.dev \
+  -H "Content-Type: application/json" \
+  -d '{"messages":[{"role":"user","content":"ping"}]}'
 ```
 
-200 = OK. Anything else = RED. Session blocked until resolved.
+Expected: `200` with a `reply` field. Anything else: session blocked.
 
 ---
 
@@ -67,7 +58,7 @@ curl -s -o /dev/null -w "%{http_code}" https://[worker-url]/canary
 Same as cusslab:
 1. Generate new Anthropic key (console.anthropic.com)
 2. Get fresh Cloudflare API token (dash.cloudflare.com)
-3. Push: `echo "sk-ant-..." | CLOUDFLARE_API_TOKEN=<token> CLOUDFLARE_ACCOUNT_ID=ce5ebfc99d1b37a7537a039d0b09d0b6 npx wrangler secret put ANTHROPIC_API_KEY --name veritas-api`
+3. Push: `echo "sk-ant-..." | CLOUDFLARE_API_TOKEN=<token> CLOUDFLARE_ACCOUNT_ID=ce5ebfc99d1b37a7537a039d0b09d0b6 npx wrangler secret put ANTHROPIC_API_KEY`
 4. Verify canary green
 
 ---

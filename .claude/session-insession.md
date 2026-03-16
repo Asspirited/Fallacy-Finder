@@ -25,6 +25,11 @@
 → Check: Gherkin approved? Unit tests red? DDD RED done? If not — stop and say why.
 → If yes: Run: IMPLEMENTATION SEQUENCE
 
+### TRIGGER: "deploy" / "wrangler" / "worker" / "secret put"
+→ STOP. Read `.claude/practices/auth-ops.md` IN FULL before any wrangler command.
+→ Always include `CLOUDFLARE_ACCOUNT_ID=ce5ebfc99d1b37a7537a039d0b09d0b6` — never omit it.
+→ Then: Run: DEPLOY SEQUENCE
+
 ### TRIGGER: "commit" / "push" / "ship it"
 → Run: COMMIT SEQUENCE
 
@@ -268,7 +273,7 @@ Security: no keys client-side, ever — OWASP
 .claude/practices/domain-model.md  — agent/subject work + ubiquitous language
 .claude/CLAUDE.md                  — ways of working, BDD quality gate
 .claude/practices/waste-log.md     — append after mistakes
-.claude/practices/auth-ops.md      — auth/deploy work
+.claude/practices/auth-ops.md      — auth/deploy work ⚠️ READ BEFORE ANY WRANGLER COMMAND
 specs/                             — all Gherkin lives here
 docs/                              — all agent files live here
 pipeline/unit-runner.js            — all unit tests
